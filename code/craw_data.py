@@ -2,7 +2,7 @@ import requests
 import os
 import pandas as pd
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import time
 import random
 import os.path
