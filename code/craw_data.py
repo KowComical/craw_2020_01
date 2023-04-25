@@ -107,7 +107,7 @@ def replace_query_params_with_dict(url_string, replacement_dict):
 
 def main():
     file_path = './data/'
-    start_date = datetime(2020, 1, 1)
+    start_date = date(2020, 1, 1)
     end_date = datetime.now().date()
     delta = timedelta(days=1)
 
