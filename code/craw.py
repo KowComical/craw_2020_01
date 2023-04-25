@@ -89,8 +89,6 @@ def craw_company_luzi():
     existing_code_list = all_luzi['ps_code'].unique()
     new_list = sorted(list(set(code_list) - set(existing_code_list)))
 
-    has_error_occurred = False
-
     for co in new_list:
         try:
             # Replace the code with each company's name
@@ -102,18 +100,12 @@ def craw_company_luzi():
             luzi_code = pd.json_normalize(luzi_html.json())
             luzi_code.to_csv(luzi_path, index=False, encoding='utf_8_sig', header=False,
                              mode='a')
-            random_time = random.uniform(5, 10)  # 每一次成功爬取都随机休息5到10秒
+            random_time = random.uniform(10, 20)  # 每一次成功爬取都随机休息5到10秒
             time.sleep(random_time)
 
         except Exception as e:
             print(f"Error occurred for {co}: {e}")
-            has_error_occurred = True
             return
-
-    if has_error_occurred:
-        print("Error occurred during processing. Loop finished.")
-    else:
-        print("Loop finished without errors.")
 
 
 if __name__ == '__main__':
