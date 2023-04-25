@@ -81,6 +81,7 @@ def craw_company_luzi():
     select_luzi_url = 'GetBurnList.ashx'
     company_url, luzi_url = find_requests(wd, select=True, select_company=select_company_url,
                                           select_luzi=select_luzi_url)
+    wd.close() # 关闭网页
 
     # 全公司信息
     company_html = requests.get(company_url)
@@ -116,6 +117,7 @@ def craw_company_luzi():
         except Exception as e:
             print(f"Error occurred for {co}: {e}")
             return
+       
 
 
 if __name__ == '__main__':
