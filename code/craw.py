@@ -17,6 +17,11 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 file_path = './data/'
 luzi_path = os.path.join(file_path, 'luzi_code.csv')
 
+headers = {
+    'User-Agent': 'Mozilla'
+                  '/5.0 (Macintosh; Intel Mac OS X 10_14) ''AppleWebKit'
+                  '/605.1.15 (KHTML, like Gecko) ''Version/12.0 Safari/605.1.15'}
+
 
 def main():
     craw_company_luzi()
@@ -88,20 +93,25 @@ def craw_company_luzi():
     all_luzi = pd.read_csv(luzi_path)
     existing_code_list = all_luzi['ps_code'].unique()
     new_list = sorted(list(set(code_list) - set(existing_code_list)))
-
+    
+    counter = 0
     for co in new_list:
         try:
-            # Replace the code with each company's name
             old_code_match = re.search(r"pscode=(?P<code>.*?)&", luzi_url)
             old_code_str = old_code_match.group(1)
             new_url = luzi_url.replace(old_code_str, co)
 
-            luzi_html = requests.get(new_url)
+            luzi_html = requests.get(new_url, headers=headers)
             luzi_code = pd.json_normalize(luzi_html.json())
             luzi_code.to_csv(luzi_path, index=False, encoding='utf_8_sig', header=False,
                              mode='a')
             random_time = random.uniform(10, 20)  # 每一次成功爬取都随机休息5到10秒
             time.sleep(random_time)
+
+            counter += 1
+            if counter % 30 == 0:  # 每爬取30个休息30-50秒
+                extended_sleep_time = random.uniform(30, 50)
+                time.sleep(extended_sleep_time)
 
         except Exception as e:
             print(f"Error occurred for {co}: {e}")
