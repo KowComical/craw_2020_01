@@ -29,7 +29,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run code
-        run: python ./code/craw.py
+        run: python ./code/craw_data.py
 
       - name: Commit and push
         run: |
