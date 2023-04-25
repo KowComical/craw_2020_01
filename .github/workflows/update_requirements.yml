@@ -1,0 +1,16 @@
+name: update_requirements
+'on':
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch: # 添加一个可以手动运行的按钮
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Self test
+        id: selftest
+        uses: ryan-rozario/pipreqs-action-cpy@master
+        with:
+          PROJECT_PATH: .
+          REQUIREMENT_PATH: ./requirements.txt  #default is requirement.txt in the root of your repository 
