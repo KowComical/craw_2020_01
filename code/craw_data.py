@@ -168,38 +168,22 @@ def main():
                 replacement_dict = create_replacement_dict(company_url, provided_dict)
                 real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
 
-                retry_count = 0
-                max_retries = 3
+                try:
+                    # 开始爬取数据
+                    temp_data = requests.get(real_data_url).json()
+                    df_data = pd.DataFrame()
+                    for i in range(len(temp_data)):
+                        test = pd.json_normalize(temp_data[i])
+                        df_data = pd.concat([df_data, test]).reset_index(drop=True)
 
-                while True:
-                    try:
-                        # 开始爬取数据
-                        temp_data = requests.get(real_data_url).json()
-                        df_data = pd.DataFrame()
-                        for i in range(len(temp_data)):
-                            test = pd.json_normalize(temp_data[i])
-                            df_data = pd.concat([df_data, test]).reset_index(drop=True)
-
-                        # Save df_data to a CSV file in a folder named with company_name
-                        if not df_data.empty:
-                            df_data.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                            time.sleep(random.uniform(2, 5))
-                        break
-                    except Exception as e:
-                        retry_count += 1
-                        if retry_count > max_retries:
-                            print("Max retries exceeded. Terminating the script.")
-                            return
-
-                        print(f"Error occurred: {e}. Retrying (Attempt {retry_count})...")
-                        load_website(wd, url)
-                        close_homepage_banner(wd)
-                        open_dropdown_menu(wd)
-                        select_company(wd, company_name)
-
-                        company_url, _, _ = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
-                        replacement_dict = create_replacement_dict(company_url, provided_dict)
-                        real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
+                    # Save df_data to a CSV file in a folder named with company_name
+                    if not df_data.empty:
+                        df_data.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                        time.sleep(random.uniform(2, 5))
+                    break
+                except Exception as e:
+                    print(e)
+                    return
 
         # Sleep for a random duration between 30-50 seconds at the beginning of each year
         if current_date.month == 1 and current_date.day == 1 and current_date != start_date:
