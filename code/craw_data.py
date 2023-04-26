@@ -173,6 +173,7 @@ def main():
                     replacement_dict = create_replacement_dict(company_url, provided_dict)
                     real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
                     # 开始爬取数据
+                    time.sleep(random.uniform(5, 10))
                     temp_data = requests.get(real_data_url).json()
                     if temp_data != 404:
                         df_data = pd.DataFrame()
@@ -188,7 +189,7 @@ def main():
                 if not df_final.empty:
                     os.makedirs(company_folder, exist_ok=True)
                     df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                    time.sleep(random.uniform(2, 5))
+                    time.sleep(random.uniform(5, 10))
         print(f'{current_date} - Finished')
         current_date += delta
 
