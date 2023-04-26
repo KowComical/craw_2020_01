@@ -198,10 +198,10 @@ def craw_data(start_date, retry_time=3):
 
                             df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
                             # Save df_data to a CSV file in a folder named with company_name
-                        if not df_final.empty:
-                            os.makedirs(company_folder, exist_ok=True)
-                            df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                            time.sleep(random.uniform(5, 10))
+                        # if not df_final.empty:
+                        os.makedirs(company_folder, exist_ok=True)
+                        df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                        time.sleep(random.uniform(5, 10))
                 print(f'{current_date} - Finished')
                 current_date += delta
             return
