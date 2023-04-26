@@ -51,6 +51,9 @@ def setup_webdriver():
     chrome_options = Options()
     chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument('--v=1')
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
 
     wd = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options,
                           desired_capabilities=caps)
@@ -112,7 +115,7 @@ def main():
     delta = timedelta(days=1)
 
     df_code = pd.read_csv(os.path.join(file_path, 'luzi_code.csv'))
-    ps_code_list = df_code['ps_code'].tolist()
+    ps_code_list = df_code['ps_code'].unique()
 
     url = 'https://ljgk.envsc.cn/'
 
@@ -149,47 +152,41 @@ def main():
     all_company = pd.json_normalize(company_html.json())
 
     current_date = start_date
-    while current_date < end_date:
+    while current_date <= end_date:
         current_date_str = current_date.strftime('%Y%m%d')
 
-        company_folder = os.path.join(file_path, company_name)
-        os.makedirs(company_folder, exist_ok=True)
-        csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
-
         for ps in ps_code_list:
+            # 获取公司名称
+            company_name = all_company[all_company['ps_code'] == ps]['ps_name'].tolist()[0]
+            company_folder = os.path.join(file_path, company_name)
+            os.makedirs(company_folder, exist_ok=True)
+            csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
             if not path.exists(csv_file):
                 mp_code_list = df_code[df_code['ps_code'] == ps]['mp_code'].unique()
-                df_data = pd.DataFrame()
+                df_final = pd.DataFrame()
                 for mp in mp_code_list:
                     provided_dict['pscode'] = ps
                     provided_dict['outputcode'] = mp
                     provided_dict['day'] = current_date_str
-                    # 获取公司名称
-                    company_name = all_company[all_company['ps_code'] == ps]['ps_name'].tolist()[0]
 
                     replacement_dict = create_replacement_dict(company_url, provided_dict)
                     real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
+
                     try:
                         # 开始爬取数据
                         temp_data = requests.get(real_data_url).json()
-
+                        df_data = pd.DataFrame()
                         for i in range(len(temp_data)):
                             test = pd.json_normalize(temp_data[i])
                             df_data = pd.concat([df_data, test]).reset_index(drop=True)
-
+                        df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
                         # Save df_data to a CSV file in a folder named with company_name
-                        if not df_data.empty:
-                            df_data.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                        if not df_final.empty:
+                            df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
                             time.sleep(random.uniform(2, 5))
-                        break
                     except Exception as e:
                         print(e)
                         return
-
-        # Sleep for a random duration between 30-50 seconds at the beginning of each year
-        if current_date.month == 1 and current_date.day == 1 and current_date != start_date:
-            time.sleep(random.uniform(30, 50))
-
         current_date += delta
 
 
