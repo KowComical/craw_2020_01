@@ -175,7 +175,8 @@ def main():
                     try:
                         # 开始爬取数据
                         temp_data = requests.get(real_data_url).json()
-                        print(temp_data)
+                        print(temp_data.encode('utf-8', errors='ignore').decode('utf-8'))
+
                         df_data = pd.DataFrame()
                         for i in range(len(temp_data)):
                             test = pd.json_normalize(temp_data[i])
