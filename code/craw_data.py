@@ -143,6 +143,7 @@ def main():
     load_website(wd, url)
     close_homepage_banner(wd)
     open_dropdown_menu(wd)
+    time.sleep(5)
     select_company(wd, company_name)
 
     company_url, _, _ = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
@@ -159,7 +160,7 @@ def main():
             # 获取公司名称
             company_name = all_company[all_company['ps_code'] == ps]['ps_name'].tolist()[0]
             company_folder = os.path.join(file_path, company_name)
-            os.makedirs(company_folder, exist_ok=True)
+
             csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
             if not path.exists(csv_file):
                 mp_code_list = df_code[df_code['ps_code'] == ps]['mp_code'].unique()
@@ -171,22 +172,24 @@ def main():
 
                     replacement_dict = create_replacement_dict(company_url, provided_dict)
                     real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
-
-                    try:
-                        # 开始爬取数据
-                        temp_data = requests.get(real_data_url).json()
+                    # 开始爬取数据
+                    temp_data = requests.get(real_data_url).json()
+                    if temp_data != 404:
                         df_data = pd.DataFrame()
                         for i in range(len(temp_data)):
                             test = pd.json_normalize(temp_data[i])
                             df_data = pd.concat([df_data, test]).reset_index(drop=True)
-                        df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
-                        # Save df_data to a CSV file in a folder named with company_name
-                        if not df_final.empty:
-                            df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                            time.sleep(random.uniform(2, 5))
-                    except Exception as e:
-                        print(e)
+                    else:
+                        print('404 error')
                         return
+
+                    df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
+                    # Save df_data to a CSV file in a folder named with company_name
+                if not df_final.empty:
+                    os.makedirs(company_folder, exist_ok=True)
+                    df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                    time.sleep(random.uniform(2, 5))
+        print(f'{current_date} - Finished')
         current_date += delta
 
 
