@@ -30,6 +30,7 @@ jobs:
 
       - name: Run code
         run: python ./code/craw_data.py
+        continue-on-error: true # Add this line
 
       - name: Commit and push
         run: |
