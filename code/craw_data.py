@@ -156,8 +156,9 @@ def main():
         company_folder = os.path.join(file_path, company_name)
         os.makedirs(company_folder, exist_ok=True)
         csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
-        if not path.exists(csv_file):
-            for ps, mp in zip(ps_code_list, mp_code_list):
+
+        for ps, mp in zip(ps_code_list, mp_code_list):
+            if not path.exists(csv_file):
                 provided_dict['pscode'] = ps
                 provided_dict['outputcode'] = mp
                 provided_dict['day'] = current_date_str
@@ -168,12 +169,13 @@ def main():
                 real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
 
                 retry_count = 0
-                max_retries = 5
+                max_retries = 3
 
                 while True:
                     try:
                         # 开始爬取数据
                         temp_data = requests.get(real_data_url).json()
+                        print(temp_data)
                         df_data = pd.DataFrame()
                         for i in range(len(temp_data)):
                             test = pd.json_normalize(temp_data[i])
@@ -182,6 +184,7 @@ def main():
                         # Save df_data to a CSV file in a folder named with company_name
                         if not df_data.empty:
                             df_data.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                            time.sleep(random.uniform(2, 5))
                         break
                     except Exception as e:
                         retry_count += 1
@@ -199,11 +202,11 @@ def main():
                         replacement_dict = create_replacement_dict(company_url, provided_dict)
                         real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
 
-            # Sleep for a random duration between 30-50 seconds at the beginning of each year
-            if current_date.month == 1 and current_date.day == 1 and current_date != start_date:
-                time.sleep(random.uniform(30, 50))
+        # Sleep for a random duration between 30-50 seconds at the beginning of each year
+        if current_date.month == 1 and current_date.day == 1 and current_date != start_date:
+            time.sleep(random.uniform(30, 50))
 
-            current_date += delta
+        current_date += delta
 
 
 if __name__ == '__main__':
