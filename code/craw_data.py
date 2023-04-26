@@ -118,7 +118,6 @@ def craw_data(start_date, retry_time=3):
     retries = 0
     while not success and retries < retry_time:
         try:
-
             headers = {
                 'User-Agent': 'Mozilla'
                               '/5.0 (Macintosh; Intel Mac OS X 10_14) ''AppleWebKit'
@@ -201,6 +200,7 @@ def craw_data(start_date, retry_time=3):
                         # if not df_final.empty:
                         os.makedirs(company_folder, exist_ok=True)
                         df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                        print(f'{company_name} - {current_date} - Finished')
                         time.sleep(random.uniform(5, 10))
                 print(f'{current_date} - Finished')
                 current_date += delta
