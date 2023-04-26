@@ -20,7 +20,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 def main():
     start_date = date(2020, 1, 1)
-    craw_data(start_date, retry_time=3)
+    craw_data(start_date)
 
 
 def find_requests(driver, company_selector=None, luzi_selector=None, data_selector=None):
@@ -113,107 +113,98 @@ def replace_query_params_with_dict(url_string, replacement_dict):
     return modified_url
 
 
-def craw_data(start_date, retry_time=3):
-    success = False
-    retries = 0
-    while not success and retries < retry_time:
-        try:
-            headers = {
-                'User-Agent': 'Mozilla'
-                              '/5.0 (Macintosh; Intel Mac OS X 10_14) ''AppleWebKit'
-                              '/605.1.15 (KHTML, like Gecko) ''Version/12.0 Safari/605.1.15'}
+def craw_data(start_date):
+    try:
+        headers = {
+            'User-Agent': 'Mozilla'
+                          '/5.0 (Macintosh; Intel Mac OS X 10_14) ''AppleWebKit'
+                          '/605.1.15 (KHTML, like Gecko) ''Version/12.0 Safari/605.1.15'}
 
-            file_path = './data/'
-            end_date = datetime.now().date()
-            delta = timedelta(days=1)
+        file_path = './data/'
+        end_date = datetime.now().date()
+        delta = timedelta(days=1)
 
-            df_code = pd.read_csv(os.path.join(file_path, 'luzi_code.csv'))
-            ps_code_list = df_code['ps_code'].unique()
+        df_code = pd.read_csv(os.path.join(file_path, 'luzi_code.csv'))
+        ps_code_list = df_code['ps_code'].unique()
 
-            url = 'https://ljgk.envsc.cn/'
+        url = 'https://ljgk.envsc.cn/'
 
-            company_name = '温州龙湾伟明环保能源有限公司'
-            select_company_url = 'GetPSList.ashx'
-            select_luzi_url = 'GetBurnList.ashx'
-            select_data_url = 'GetMonitorDataList.ashx'
+        company_name = '温州龙湾伟明环保能源有限公司'
+        select_company_url = 'GetPSList.ashx'
+        select_luzi_url = 'GetBurnList.ashx'
+        select_data_url = 'GetMonitorDataList.ashx'
 
-            old_data_url = 'https://ljgk.envsc.cn/OutInterface/GetMonitorDataList.ashx?pscode' \
-                           '=13C2D0DCE6FB5F5F1BFDA298A54CA80D&outputcode=13C2D0DCE6FB5F5FB2BE3E32478A0CC5&day' \
-                           '=20230424&SystemType=C16A882D480E678F&sgn=5690ecf19458c834a84f47df1cb586a838a4a931&ts' \
-                           '=1682445782405&tc' \
-                           '=65124856'
+        old_data_url = 'https://ljgk.envsc.cn/OutInterface/GetMonitorDataList.ashx?pscode' \
+                       '=13C2D0DCE6FB5F5F1BFDA298A54CA80D&outputcode=13C2D0DCE6FB5F5FB2BE3E32478A0CC5&day' \
+                       '=20230424&SystemType=C16A882D480E678F&sgn=5690ecf19458c834a84f47df1cb586a838a4a931&ts' \
+                       '=1682445782405&tc' \
+                       '=65124856'
 
-            provided_dict = {
-                'pscode': 'pscode',
-                'outputcode': 'outputcode',
-                'day': 'day',
-                'SystemType': 'NewSystemType',
-                'sgn': 'NewSgnValue',
-                'ts': 'NewTsValue',
-                'tc': 'NewTcValue'
-            }
+        provided_dict = {
+            'pscode': 'pscode',
+            'outputcode': 'outputcode',
+            'day': 'day',
+            'SystemType': 'NewSystemType',
+            'sgn': 'NewSgnValue',
+            'ts': 'NewTsValue',
+            'tc': 'NewTcValue'
+        }
 
-            wd = setup_webdriver()
-            load_website(wd, url)
-            close_homepage_banner(wd)
-            open_dropdown_menu(wd)
-            time.sleep(5)
-            select_company(wd, company_name)
+        wd = setup_webdriver()
+        load_website(wd, url)
+        close_homepage_banner(wd)
+        open_dropdown_menu(wd)
+        time.sleep(5)
+        select_company(wd, company_name)
 
-            company_url, _, _ = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
+        company_url, _, _ = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
 
-            # 全公司信息
-            company_html = requests.get(company_url, headers=headers)
-            all_company = pd.json_normalize(company_html.json())
-            wd.close()
+        # 全公司信息
+        company_html = requests.get(company_url, headers=headers)
+        all_company = pd.json_normalize(company_html.json())
+        wd.close()
 
-            current_date = start_date
-            while current_date <= end_date:
-                current_date_str = current_date.strftime('%Y%m%d')
+        current_date = start_date
+        while current_date <= end_date:
+            current_date_str = current_date.strftime('%Y%m%d')
 
-                for ps in ps_code_list:
-                    # 获取公司名称
-                    company_name = all_company[all_company['ps_code'] == ps]['ps_name'].tolist()[0]
-                    company_folder = os.path.join(file_path, company_name)
+            for ps in ps_code_list:
+                # 获取公司名称
+                company_name = all_company[all_company['ps_code'] == ps]['ps_name'].tolist()[0]
+                company_folder = os.path.join(file_path, company_name)
 
-                    csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
-                    if not path.exists(csv_file):
-                        mp_code_list = df_code[df_code['ps_code'] == ps]['mp_code'].unique()
-                        df_final = pd.DataFrame()
-                        for mp in mp_code_list:
-                            provided_dict['pscode'] = ps
-                            provided_dict['outputcode'] = mp
-                            provided_dict['day'] = current_date_str
+                csv_file = os.path.join(company_folder, f"{current_date_str}.csv")
+                if not path.exists(csv_file):
+                    mp_code_list = df_code[df_code['ps_code'] == ps]['mp_code'].unique()
+                    df_final = pd.DataFrame()
+                    for mp in mp_code_list:
+                        provided_dict['pscode'] = ps
+                        provided_dict['outputcode'] = mp
+                        provided_dict['day'] = current_date_str
 
-                            replacement_dict = create_replacement_dict(company_url, provided_dict)
-                            real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
-                            # 开始爬取数据
-                            time.sleep(random.uniform(5, 10))
-                            temp_data = requests.get(real_data_url, headers=headers).json()
-                            df_data = pd.DataFrame()
-                            for i in range(len(temp_data)):
-                                test = pd.json_normalize(temp_data[i])
-                                df_data = pd.concat([df_data, test]).reset_index(drop=True)
-
-                            df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
-                            # Save df_data to a CSV file in a folder named with company_name
-                        # if not df_final.empty:
-                        os.makedirs(company_folder, exist_ok=True)
-                        df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                        print(f'{ps} - {current_date} - Finished')
+                        replacement_dict = create_replacement_dict(company_url, provided_dict)
+                        real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
+                        # 开始爬取数据
                         time.sleep(random.uniform(5, 10))
-                print(f'{current_date} - Finished')
-                current_date += delta
-            return
-        except Exception as e:
-            retries += 1
-            print(f"Error: {e}")
-            if retries < retry_time:
-                print(f"Retrying in 60 seconds... (Attempt {retries} of {retry_time})")
-                time.sleep(60)
-            else:
-                print(f"Failed after {retry_time} attempts. Exiting.")
-                return
+                        temp_data = requests.get(real_data_url, headers=headers).json()
+                        df_data = pd.DataFrame()
+                        for i in range(len(temp_data)):
+                            test = pd.json_normalize(temp_data[i])
+                            df_data = pd.concat([df_data, test]).reset_index(drop=True)
+
+                        df_final = pd.concat([df_final, df_data]).reset_index(drop=True)
+                        # Save df_data to a CSV file in a folder named with company_name
+                    # if not df_final.empty:
+                    os.makedirs(company_folder, exist_ok=True)
+                    df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
+                    print(f'{ps} - {current_date} - Finished')
+                    time.sleep(random.uniform(5, 10))
+            print(f'{current_date} - Finished')
+            current_date += delta
+        return
+    except Exception as e:
+        print(e)
+        return
 
 
 if __name__ == '__main__':
