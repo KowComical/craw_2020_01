@@ -38,6 +38,3 @@ jobs:
           git add -A
           git commit -m "updated"
           git push
-      - name: Trigger workflow again
-        run: |
-          Invoke-WebRequest -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/dispatches" -Method POST -Headers @{"Authorization"="token ${{ secrets.PAT }}"; "Accept"="application/vnd.github+json"} -Body ('{"ref":"{0}"}' -f "${{ github.ref }}") -Body ('{"ref":"{0}"}' -f ${{ github.ref }})
