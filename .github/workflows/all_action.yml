@@ -1,19 +1,24 @@
 name: all_action
-'on':
-  workflow_dispatch: # 添加一个可以手动运行的按钮
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [Trigger all_action workflow]
+    types: completed
 jobs:
-  all_process: # 处理所有数据
+  all_process:
     runs-on: windows-latest
+    if: ${{ github.event_name == 'push' && success() }}
     steps:
       - name: Set up Node.js 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16 # This line was updated to use Node.js 16
+          node-version: 16
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.API_TOKEN_GITHUB_2 }} # Use your personal access token
+          token: ${{ secrets.API_TOKEN_GITHUB_2 }}
           fetch-depth: 0
 
       - name: Set up Python 3.10
@@ -25,6 +30,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          
       - name: Run code 
         run: |
           python ./code/craw_data.py
@@ -38,3 +44,14 @@ jobs:
           git add -A
           git commit -m "updated"
           git push
+
+  trigger:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Trigger all_action repository dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.API_TOKEN_GITHUB_2 }}
+          repository: ${{ github.repository }}
+          event-type: all_action
