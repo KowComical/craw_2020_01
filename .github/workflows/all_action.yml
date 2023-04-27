@@ -5,6 +5,7 @@ on:
   workflow_run:
     workflows: [Trigger all_action workflow]
     types: completed
+  workflow_dispatch:
 jobs:
   all_process:
     runs-on: windows-latest
