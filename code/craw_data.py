@@ -7,6 +7,7 @@ import time
 import random
 import os.path
 from os import path
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -208,7 +209,7 @@ def craw_data(start_date):
             current_date += delta
         return
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         return
 
 
