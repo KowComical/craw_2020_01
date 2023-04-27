@@ -25,26 +25,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run code with 5-hour time limit
-        shell: pwsh
+      - name: Run code 
         run: |
-          $job = Start-Job -ScriptBlock { python ./code/craw_data.py }
-          $startTime = Get-Date
-          $result = $null
-          while ($true) {
-            $result = Receive-Job -Job $job -Wait -AutoRemoveJob
-            if ($result) {
-              break
-            }
-            $currentTime = Get-Date
-            if (($currentTime - $startTime).TotalHours -ge 5) {
-              Stop-Job -Job $job
-              Remove-Job -Job $job
-              throw "The job timed out after 5 hours."
-            }
-            Start-Sleep -Seconds 10
-          }
-        continue-on-error: true
+          python ./code/craw_data.py
+          continue-on-error: true
 
       - name: Commit and push
         run: |
