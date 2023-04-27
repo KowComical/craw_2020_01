@@ -83,6 +83,10 @@ def select_company(driver, company_name):
     driver.find_element(By.XPATH, f"//li[contains(., '{company_name}')]").click()  # 点击公司名
 
 
+def select_datamonitor(driver):
+    driver.find_element(By.XPATH, '//*[@id="monitordata"]').click()
+
+
 def create_replacement_dict(first_string, provided_dict):
     first_url = urlparse(first_string)
     first_query_params = parse_qs(first_url.query)
@@ -156,8 +160,9 @@ def craw_data(start_date):
         open_dropdown_menu(wd)
         time.sleep(5)
         select_company(wd, company_name)
+        select_datamonitor(wd)
 
-        company_url, _, _ = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
+        company_url, _, data_url = find_requests(wd, select_company_url, select_luzi_url, select_data_url)
 
         # 全公司信息
         company_html = requests.get(company_url, headers=headers)
@@ -182,7 +187,7 @@ def craw_data(start_date):
                         provided_dict['outputcode'] = mp
                         provided_dict['day'] = current_date_str
 
-                        replacement_dict = create_replacement_dict(company_url, provided_dict)
+                        replacement_dict = create_replacement_dict(data_url, provided_dict)
                         real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
                         # 开始爬取数据
                         time.sleep(random.uniform(5, 10))
@@ -197,7 +202,7 @@ def craw_data(start_date):
                     # if not df_final.empty:
                     os.makedirs(company_folder, exist_ok=True)
                     df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                    print(f'{ps} - {current_date} - Finished')
+                    print(f'{company_name} - {current_date} - Finished')
                     time.sleep(random.uniform(5, 10))
             print(f'{current_date} - Finished')
             current_date += delta
