@@ -202,7 +202,7 @@ def craw_data(start_date):
                     # if not df_final.empty:
                     os.makedirs(company_folder, exist_ok=True)
                     df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
-                    print(f'{company_name} - {current_date} - Finished')
+                    # print(f'{company_name} - {current_date} - Finished')
                     time.sleep(random.uniform(5, 10))
             print(f'{current_date} - Finished')
             current_date += delta
