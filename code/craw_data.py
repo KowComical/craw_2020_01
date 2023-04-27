@@ -139,12 +139,6 @@ def craw_data(start_date):
         select_luzi_url = 'GetBurnList.ashx'
         select_data_url = 'GetMonitorDataList.ashx'
 
-        old_data_url = 'https://ljgk.envsc.cn/OutInterface/GetMonitorDataList.ashx?pscode' \
-                       '=13C2D0DCE6FB5F5F1BFDA298A54CA80D&outputcode=13C2D0DCE6FB5F5FB2BE3E32478A0CC5&day' \
-                       '=20230424&SystemType=C16A882D480E678F&sgn=5690ecf19458c834a84f47df1cb586a838a4a931&ts' \
-                       '=1682445782405&tc' \
-                       '=65124856'
-
         provided_dict = {
             'pscode': 'pscode',
             'outputcode': 'outputcode',
@@ -189,7 +183,7 @@ def craw_data(start_date):
                         provided_dict['day'] = current_date_str
 
                         replacement_dict = create_replacement_dict(data_url, provided_dict)
-                        real_data_url = replace_query_params_with_dict(old_data_url, replacement_dict)
+                        real_data_url = replace_query_params_with_dict(data_url, replacement_dict)
                         # 开始爬取数据
                         # time.sleep(random.uniform(5, 10))
                         temp_data = requests.get(real_data_url, headers=headers).json()
