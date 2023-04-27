@@ -186,7 +186,7 @@ def craw_data(start_date):
                         replacement_dict = create_replacement_dict(data_url, provided_dict)
                         real_data_url = replace_query_params_with_dict(data_url, replacement_dict)
                         # 开始爬取数据
-                        time.sleep(random.uniform(10, 15))
+                        time.sleep(random.uniform(5, 10))
                         temp_data = requests.get(real_data_url, headers=headers).json()
                         df_data = pd.DataFrame()
                         for i in range(len(temp_data)):
@@ -199,7 +199,7 @@ def craw_data(start_date):
                     os.makedirs(company_folder, exist_ok=True)
                     df_final.to_csv(csv_file, index=False, encoding='utf_8_sig')
                     # print(f'{company_name} - {current_date} - Finished')
-                    time.sleep(random.uniform(10, 15))
+                    time.sleep(random.uniform(5, 10))
             print(f'{current_date} - Finished')
             current_date += delta
         return
