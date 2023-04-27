@@ -41,7 +41,4 @@ jobs:
 
       - name: Trigger workflow again
         run: |
-          curl -X POST "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/dispatches" \
-          -H "Authorization: token ${{ secrets.API_TOKEN_GITHUB_2 }}" \
-          -H "Accept: application/vnd.github+json" \
-          -d '{"ref":"${{ github.ref }}"}'
+          Invoke-WebRequest -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/dispatches" -Method POST -Headers @{"Authorization"="token ${{ secrets.PAT }}"; "Accept"="application/vnd.github+json"} -Body ('{"ref":"{0}"}' -f ${{ github.ref }})
