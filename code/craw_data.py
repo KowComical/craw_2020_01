@@ -213,4 +213,9 @@ def craw_data(start_date):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    if elapsed_time > 5 * 60 * 60:  # 5 hours in seconds
+        raise SystemExit('Program exceeded 5 hours of running time')
