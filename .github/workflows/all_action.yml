@@ -6,7 +6,16 @@ on:
     workflows: [Trigger all_action workflow]
     types: completed
   workflow_dispatch:
+
 jobs:
+  print-event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print event name and workflow run conclusion
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
+
   all_process:
     runs-on: windows-latest
     if: ${{ github.event_name == 'push' && success() }}
@@ -31,11 +40,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          
-      - name: Run code 
+
+      - name: Run code
         run: |
           python ./code/craw_data.py
-          
+
         continue-on-error: true
 
       - name: Commit and push
