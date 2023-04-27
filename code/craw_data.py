@@ -93,10 +93,10 @@ def create_replacement_dict(first_string, provided_dict):
     replacement_dict = {}
 
     for key, value in provided_dict.items():
-        if key in first_query_params:
+        if key != 'pscode' and key != 'outputcode' and key != 'day':
             replacement_dict[key] = first_query_params[key][0]
         else:
-            replacement_dict[key] = value
+            replacement_dict[key] = provided_dict[key]
 
     return replacement_dict
 
