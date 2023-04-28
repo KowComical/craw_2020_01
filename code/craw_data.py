@@ -128,7 +128,7 @@ def craw_data(start_date, end_date=None):
         'Connections':'close'}
 
         file_path = './data/'
-        if not_date:
+        if not end_date:
             end_date = datetime.now().date()
         delta = timedelta(days=1)
 
