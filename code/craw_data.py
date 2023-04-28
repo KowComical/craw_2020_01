@@ -21,6 +21,8 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 def main():
     start_date = date(2020, 1, 1)
+    # end_date = datetime.now().date()
+    end_date = date(2020, 2, 1)
     craw_data(start_date)
 
 
@@ -118,7 +120,7 @@ def replace_query_params_with_dict(url_string, replacement_dict):
     return modified_url
 
 
-def craw_data(start_date):
+def craw_data(start_date, end_date):
     try:
         headers = {
             'User-Agent': 'Mozilla'
@@ -127,7 +129,6 @@ def craw_data(start_date):
         'Connections':'close'}
 
         file_path = './data/'
-        end_date = datetime.now().date()
         delta = timedelta(days=1)
 
         df_code = pd.read_csv(os.path.join(file_path, 'luzi_code.csv'))
@@ -166,7 +167,7 @@ def craw_data(start_date):
         wd.close()
 
         current_date = start_date
-        while current_date <= end_date:
+        while current_date < end_date:
             current_date_str = current_date.strftime('%Y%m%d')
 
             for ps in ps_code_list:
