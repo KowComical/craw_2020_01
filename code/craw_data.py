@@ -21,9 +21,8 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 def main():
     start_date = date(2020, 1, 1)
-    # end_date = datetime.now().date()
     end_date = date(2020, 2, 1)
-    craw_data(start_date)
+    craw_data(start_date, end_date)
 
 
 def find_requests(driver, company_selector=None, luzi_selector=None, data_selector=None):
@@ -120,7 +119,7 @@ def replace_query_params_with_dict(url_string, replacement_dict):
     return modified_url
 
 
-def craw_data(start_date, end_date):
+def craw_data(start_date, end_date=None):
     try:
         headers = {
             'User-Agent': 'Mozilla'
@@ -129,6 +128,8 @@ def craw_data(start_date, end_date):
         'Connections':'close'}
 
         file_path = './data/'
+        if not_date:
+            end_date = datetime.now().date()
         delta = timedelta(days=1)
 
         df_code = pd.read_csv(os.path.join(file_path, 'luzi_code.csv'))
